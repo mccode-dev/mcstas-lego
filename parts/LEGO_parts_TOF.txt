@@ -1,0 +1,37 @@
+TOF LEGO parts
+
+
+
+  No. Part no.     Part name
+-------------------------------------------------------------------------------
+    2 6143.dat     Brick  2 x  2 Round Type 2
+    2 3958.dat     Plate  6 x  6
+    1 32062.dat    Technic Axle  2 Notched
+    3 3705.dat     Technic Axle  4
+    3 32073.dat    Technic Axle  5
+    1 3706.dat     Technic Axle  6
+    1 3707.dat     Technic Axle  8
+    2 3737.dat     Technic Axle 10
+   11 3708.dat     Technic Axle 12
+    2 43093.dat    Technic Axle Pin with Friction
+    2 43857.dat    Technic Beam  2
+    2 32140.dat    Technic Beam  2 x  4 Liftarm Bent 90
+    5 32523.dat    Technic Beam  3
+    2 32526.dat    Technic Beam  3 x  5 Bent 90
+   35 32316.dat    Technic Beam  5
+    4 32524.dat    Technic Beam  7
+    7 40490.dat    Technic Beam  9
+    2 32525.dat    Technic Beam 11
+   24 41239.dat    Technic Beam 13
+   60 3713.dat     Technic Bush
+    1 32039.dat    Technic Connector with Axlehole
+    8 32184.dat    Technic Cross Block 1 x 3 (Axle/Pin/Axle)
+    8 3647.dat     Technic Gear  8 Tooth
+    8 32270.dat    Technic Gear 12 Tooth Double Bevel
+    8 4019.dat     Technic Gear 16 Tooth
+    1 3673.dat     Technic Pin
+   43 6558.dat     Technic Pin Long with Friction and Slot
+  129 2780.dat     Technic Pin with Friction and Slots
+    4 32271.dat    Technic Beam 3 x 7 Liftarm Bent 53.5  
+   51 32123.dat    Technic Bush 1/2 
+    3 55615.dat    Technic Beam 3 x 3 Bent with Pins

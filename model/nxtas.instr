@@ -1,0 +1,46 @@
+/*******************************************************************************
+*         McStas instrument definition URL=http://www.mcstas.org
+*
+* Instrument: nxtas
+*
+* %Identification
+* Written by: Emmanuel Farhi (farhi@ill.fr) & Jean-Philippe Panaget (jppanaget@gmail.com)
+* Date: 17/11/2011
+* Origin: Institut Laue Langevin
+* Release: McStas CVS-080208
+* Version: 0.2
+* %INSTRUMENT_SITE: Institut_Laue_Langevin
+*
+* Instrument short description
+* This instrument is a model of TAS spectrometer made with NXT Lego mindstorms.
+* 
+* %Description
+* Instrument longer description (type, elements, usage...)
+*
+* Example: mcrun test.instr <parameters=values>
+*
+* %Parameters
+* A1: [deg] Monohromator rotation angle
+* A2: [deg] Monohromator take-off angle 
+* A3: [deg] Sample rotation angle
+* A4: [deg] Sample take-off angle
+* A5: [deg] Analyser rotation angle
+* A6: [deg] Analyser take-off angle
+* SPEED: [percent] Motor power
+* %End
+*******************************************************************************/
+
+
+DEFINE INSTRUMENT nxtas(A1=20,A2=40,A3=10,A4=20,A5=20,A6=40,SPEED=80)
+
+TRACE
+
+COMPONENT Origin = Progress_bar()
+  AT (0,0,0) ABSOLUTE
+
+COMPONENT nxt=NXTAS(A1=A1,A2=A2,A3=A3,A4=A4,A5=A5,A6=A6,SPEED=SPEED)
+  AT (0,0,0) ABSOLUTE
+
+END
+
+

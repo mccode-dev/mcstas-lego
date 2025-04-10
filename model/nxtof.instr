@@ -1,0 +1,39 @@
+/*******************************************************************************
+*         McStas instrument definition URL=http://www.mcstas.org
+*
+* Instrument: nxTOF
+*
+* %Identification
+* Written by: Emmanuel Farhi (farhi@ill.fr) & Jean-Philippe Panaget (jppanaget@gmail.com)
+* Date: 17/11/210
+* Origin: Institut Laue Langevin
+* Release: McStas CVS-080208
+* Version: 0.2
+* %INSTRUMENT_SITE: Institut_Laue_Langevin
+*
+* Instrument short description
+* This instrument is a model of TAS spectrometer made with NXT Lego mindstorms.
+*
+* %Parameters
+* A1: [deg] Monohromator rotation angle
+* A2: [deg] Monohromator take-off angle 
+* A3: [deg] Sample rotation angle
+* FSPEED: [percent] Fermi chopper rotation speed
+*
+* %End
+*******************************************************************************/
+
+/* Change name of instrument and input parameters with default values */
+DEFINE INSTRUMENT nxtof(A1=20,A2=40,A3=40,FSPEED=50)
+
+TRACE
+
+COMPONENT Origin = Progress_bar()
+  AT (0,0,0) ABSOLUTE
+
+COMPONENT nxt=NXTOF(A1=A1,A2=A2,A3=A3,FSPEED=FSPEED)
+  AT (0,0,0) ABSOLUTE
+
+END
+
+
