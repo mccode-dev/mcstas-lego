@@ -2,7 +2,7 @@
 
 TAS and TOF neutron scattering spectrometers connected with a Lego NXT MindStorms model
 
-![Assembled model](images/IMG_20130610_094103.png)
+![Assembled model](images/IMG_20130610_094103.jpg)
 
 This is a set of McStas components and instruments to model a Triple-Axis and a Time-Of-Flight neutron scattering instruments, connected with a [Lego MindStorms](https://en.wikipedia.org/wiki/Lego_Mindstorms_NXT) real-world model. 
 
