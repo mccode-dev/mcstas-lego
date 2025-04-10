@@ -1,0 +1,457 @@
+//
+// Spectrometer TOF Standalone with the LEGO Mindstorms NXT.
+//
+// 2010, Institut Laue Langevin.
+
+
+
+
+task main ()
+{
+	int i, j;
+	int count_m = 1;   // Identifiant des moteurs 1 pour le moteur A, 2 pour le moteur B, et 3 pour le C
+   
+	int temp1=0;       // 1 si nous sommes dans un des moteur
+	int menuM=0;       // 1 si nous sommes dans le selecteur d'angle du Monochromateur
+	int menuF=0;       // 1 si nous sommes dans le selecteur de vitesse du Fermi
+	int menuS=0;       // 1 si nous sommes dans le selecteur d'angle du sample
+   
+	float angleM = 0;    // angle du monochromateur
+	float angleM_before = 0;
+	float speedF = 25;   // vitesse de rotation du Fermi chopper en pourcent
+	float angleS= 0;     //angle du sample
+	float angleS_before= 0;
+
+		//flag permettant de stoper des boucles
+	int flag1=0 ;
+	int flag11=0 ;
+	int flag111=0 ;
+	int flag1111=0 ;
+	int flag2=0;
+
+	int flag3=0;
+	int flag33=0;
+	int flag333=0;
+	int flag4=0;
+   
+	int flagsortie=0;
+	int flagsortie2=0;
+   
+	int flagsortieM=0;
+	int flagsortieM2=0;
+   
+
+   
+   
+	int motor_a_now, motor_a_init, a;
+	int motor_b_now, motor_b_init, b;
+	int motor_c_now, motor_c_init, c;
+   
+	// positions initiales
+	motor_a_init = MotorTachoCount (OUT_A);
+	motor_a_now = motor_a_init;
+   
+	motor_b_init = MotorTachoCount (OUT_B);
+	motor_b_now = motor_b_init;
+   
+	motor_c_init = MotorTachoCount (OUT_C);
+	motor_c_now = motor_c_init;
+   
+SetSensorTouch(IN_1);      //Capteur de pression G branché sur le capteur 1
+SetSensorTouch(IN_2);      //Capteur de prssion D branché sur le capteur 2
+   
+		while (true)
+		{
+			if(temp1==0){
+		TextOut(10, LCD_LINE1, "IN6-TOF MODEL");
+		TextOut(40, LCD_LINE2, "ILL");
+		TextOut(0, LCD_LINE4, "SELECT MOTOR :");
+		TextOut(0, LCD_LINE7, "(G to change and");
+		TextOut(10, LCD_LINE8, "D to validate)");
+					}
+
+
+					if (count_m==1 && temp1==0)
+					{
+						NumOut(90, LCD_LINE4, 1);
+						TextOut(0, LCD_LINE5, "                                                                                     ");
+						TextOut(10, LCD_LINE5, "MONOCHROMATOR");
+					}
+
+					if (count_m==2 && temp1==0)
+					{
+						NumOut(90, LCD_LINE4, 2);
+						TextOut(0, LCD_LINE5, "                                                                                     ");
+						TextOut(10, LCD_LINE5, "FERMI CHOPPER");
+					}
+             
+				if (count_m==3 && temp1==0)
+					{
+						NumOut(90, LCD_LINE4, 3);
+						TextOut(0, LCD_LINE5, "                                                                                     ");
+						TextOut(30, LCD_LINE5, "SAMPLE");
+					}
+
+
+
+
+					if(SENSOR_1 == 0){
+					flag1=0;
+					flag2=0;
+					flag11=0;
+					flag111=0;
+					flag1111=0;
+
+					}
+                   
+					if(SENSOR_1 == 1 && temp1==0 && flag2==0)   // Sensor G activé
+						{
+
+						count_m=count_m+1;
+						if (count_m>3){        // limité à 3 moteurs
+						count_m=1;
+						}
+						NumOut(90, LCD_LINE4, count_m);
+
+						flag2=1;
+				}
+
+					if(SENSOR_2 == 0){
+					flag3=0;
+					flag33=0;
+					flag333=0;
+					flag4=0;
+
+					}
+                   
+
+
+							if(SENSOR_2 == 1 && count_m==1 && flag4==0) // Sensor D activé et choix du monochromateur
+								{
+										temp1=1;
+										menuM=1;
+                                       
+								TextOut(0, LCD_LINE4, "                                                                                     ");        // efface la ligne de l'écran 
+								TextOut(0, LCD_LINE5, "                                                            ");
+								TextOut(0, LCD_LINE6, "                                                            ");
+								TextOut(0, LCD_LINE7, "                                                            ");
+								TextOut(0, LCD_LINE8, "                                                            ");
+                                       
+								TextOut(0, LCD_LINE4, "MONOCHROMATOR");
+								TextOut(30, LCD_LINE5, "ANGLE :");
+								TextOut(10, LCD_LINE7, "(G - or D +)");
+								TextOut(10, LCD_LINE8, "(G & D finish)")   ;
+
+
+											if(SENSOR_1 ==1 && flag1==0){                                                                              // G+D sortie du menu
+											TextOut(0, LCD_LINE4, "                                                                                                                   ");         // efface la ligne de l'écran
+											TextOut(0, LCD_LINE5, "                                                                                                                   ");
+											TextOut(0, LCD_LINE6, "                                                                                          ");
+											TextOut(0, LCD_LINE7, "                                                                                          ");
+											TextOut(0, LCD_LINE8, "                                                                                          ");
+											temp1=0;
+
+											flag1=1;
+											}
+
+								flag4=1;
+								}
+                                
+                                
+								////////////////// Definition de l'angle lié au monochromateur //////////
+                                
+                                
+								if(menuM==1)
+									{
+									if(SENSOR_2 == 1)
+										{
+
+									angleM=angleM + 0.03;
+									TextOut(73, LCD_LINE5, "                                                                                                     ");
+									NumOut(73, LCD_LINE5, angleM);
+                                   
+										if(SENSOR_1 ==1 && flag11==0){
+												
+											TextOut(0, LCD_LINE5, "                                                                                                     ");
+
+											temp1=0;
+
+											flag11=1;
+											menuM=0;
+											}
+                                   
+
+										}
+
+
+									if(SENSOR_1 == 1)
+										{
+
+									angleM=angleM - 0.03;
+
+									TextOut(73, LCD_LINE5, "                                                                                                     ");
+									NumOut(73, LCD_LINE5, angleM);
+											if(SENSOR_2 ==1 && flag3==0){
+													
+											TextOut(0, LCD_LINE5, "                                                                                 ");
+
+											temp1=0;
+
+											flag3=1;
+											menuM=0;
+											}
+
+										}
+                                  
+                                  
+									if(SENSOR_1 == 1 || SENSOR_2 == 1){
+									flagsortieM=0;
+									}
+
+									if(SENSOR_1 == 0 && SENSOR_2 == 0 && flagsortieM == 0){
+
+										if((angleM-angleM_before)>20 || (angleM-angleM_before)<-20 ){
+										RotateMotor(OUT_A,80,-(angleM-angleM_before)/4);
+										ResetTachoCount(OUT_A);
+										Wait(500);
+										RotateMotor(OUT_A,80,-(angleM-angleM_before)/4);
+										ResetTachoCount(OUT_A);
+										Wait(500);
+										RotateMotor(OUT_A,80,-(angleM-angleM_before)/4);
+										ResetTachoCount(OUT_A);
+										Wait(500);
+										RotateMotor(OUT_A,80,-(angleM-angleM_before)/4);
+										}
+										else{
+										RotateMotor(OUT_A,80,-(angleM-angleM_before));
+										}
+
+									ResetTachoCount(OUT_A);
+
+									flagsortieM=1;
+									flagsortieM2=0;
+									}
+
+										if (flagsortieM==1&&flagsortieM2==0){
+										angleM_before=angleM;
+										flagsortieM2=1;
+										}
+                                  
+									}
+
+									///////////////////////////////////////////////////////////////////
+                                
+                                
+                                
+								if(SENSOR_2 == 1 && count_m==2 && flag4==0) // Fermi chopper selectionné
+								{
+										temp1=1;
+										menuF=1;
+                                       
+								TextOut(0, LCD_LINE4, "                                                            ");          
+								TextOut(0, LCD_LINE5, "                                                            ");
+								TextOut(0, LCD_LINE6, "                                                            ");
+								TextOut(0, LCD_LINE7, "                                                            ");
+								TextOut(0, LCD_LINE8, "                                                            ");
+
+								TextOut(0, LCD_LINE4, "FERMI CHOPPER");
+								TextOut(30, LCD_LINE5, "SPEED :");
+								TextOut(10, LCD_LINE7, "(G - or D +)");
+								TextOut(10, LCD_LINE8, "(G & D finish)")   ;
+
+								if(SENSOR_1 ==1 && flag1==0){                                                                                   //      G+D retour au menu
+								TextOut(0, LCD_LINE4, "                                                            ");              
+								TextOut(0, LCD_LINE5, "                                                            ");
+								TextOut(0, LCD_LINE6, "                                                            ");
+								TextOut(0, LCD_LINE7, "                                                            ");
+								TextOut(0, LCD_LINE8, "                                                            ");
+								temp1=0;
+								flag1=1;
+
+								}
+									flag4=1;
+								}
+                                
+
+								////////////////// Définition de la vitesse de rotation du Fermi Chopper  //////////
+
+
+								if(menuF==1)
+									{
+
+
+									if(SENSOR_2 == 1)
+									{
+
+									speedF=speedF + 0.03;
+                                  
+									if(speedF>=100){
+									speedF=100;
+									}
+									TextOut(73, LCD_LINE5, "                                                                                                     ");
+									NumOut(73, LCD_LINE5, speedF);
+
+									if(SENSOR_1 ==1 && flag111==0){
+													
+											TextOut(0, LCD_LINE5, "                                                                                                     ");
+
+											temp1=0;
+
+											flag111=1;
+											menuF=0;
+											}
+
+
+									}
+
+
+									if(SENSOR_1 == 1)
+									{
+
+									speedF=speedF - 0.03;
+
+									if(speedF<=0){
+									speedF=0;
+									}
+                                   
+									TextOut(73, LCD_LINE5, "                                                                                                     ");
+									NumOut(73, LCD_LINE5, speedF);
+											if(SENSOR_2 ==1 && flag33==0){
+													
+											TextOut(0, LCD_LINE5, "                                                                                 ");
+
+											temp1=0;
+
+											flag33=1;
+											menuF=0;
+											}
+
+									}
+                                  
+									OnFwd(OUT_B, speedF);
+
+									}
+
+									///////////////////////////////////////////////////////////
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+									if(SENSOR_2 == 1 && count_m==3 && flag4==0) // Selection du menu lié au sample
+								{
+										temp1=1;
+										menuS=1;
+
+								TextOut(0, LCD_LINE4, "                                                            ");               
+								TextOut(0, LCD_LINE5, "                                                            ");
+								TextOut(0, LCD_LINE6, "                                                            ");
+								TextOut(0, LCD_LINE7, "                                                            ");
+								TextOut(0, LCD_LINE8, "                                                            ");
+
+								TextOut(30, LCD_LINE4, "SAMPLE");
+								TextOut(30, LCD_LINE5, "ANGLE :");
+								TextOut(10, LCD_LINE7, "(G - or D +)");
+								TextOut(10, LCD_LINE8, "(G & D finish)");
+                                
+								if(SENSOR_1 ==1 && flag1=1){                                                                                   // G+D retour au menu principal
+								TextOut(0, LCD_LINE4, "                                                            ");            
+								TextOut(0, LCD_LINE5, "                                                            ");
+								TextOut(0, LCD_LINE6, "                                                            ");
+								TextOut(0, LCD_LINE7, "                                                            ");
+								TextOut(0, LCD_LINE8, "                                                            ");
+								temp1=0;
+									flag1=1;
+								}
+										flag4=1;
+								}
+                                
+                                
+                                
+							////////////////// Definition de l'angle lié au Sample //////////
+
+
+								if(menuS==1)
+									{
+                                  
+
+									if(SENSOR_2 == 1)
+									{
+
+									angleS=angleS + 0.03;
+
+									TextOut(73, LCD_LINE5, "                                                                                                     ");
+									NumOut(73, LCD_LINE5, angleS);
+
+
+									if(SENSOR_1 ==1 && flag11==0){
+													
+											TextOut(0, LCD_LINE5, "                                                                                                     ");
+
+											temp1=0;
+											flag11=1;
+											menuS=0;
+
+											}
+									}
+
+
+									if(SENSOR_1 == 1)
+									{
+
+									angleS=angleS - 0.03;
+
+									TextOut(73, LCD_LINE5, "                                                                                                     ");
+
+
+									NumOut(73, LCD_LINE5, angleS);
+
+                                    
+											if(SENSOR_2 ==1 && flag3==0){
+
+												
+											TextOut(0, LCD_LINE5, "                                                                                 ");
+
+											temp1=0;
+											flag3=1;
+											menuS=0;
+											}
+
+
+									}
+                                  
+									if(SENSOR_1 == 1 || SENSOR_2 == 1){
+									flagsortie=0;
+									}
+
+									if(SENSOR_1 == 0 && SENSOR_2 == 0 && flagsortie == 0){
+                                  
+
+									RotateMotor(OUT_C,60,angleS/2-angleS_before/2);
+
+									ResetTachoCount(OUT_C);
+
+									flagsortie=1;
+									flagsortie2=0;
+									}
+                                  
+									if (flagsortie==1&&flagsortie2==0){
+									angleS_before=angleS;
+									flagsortie2=1;
+									}
+
+
+									}
+
+									///////////////////////////////////////////////////////////////////
+                                
+
+                                
+}
+
+}

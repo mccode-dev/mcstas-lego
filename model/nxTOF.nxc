@@ -1,0 +1,293 @@
+	//
+	// Spectrometer TAS with the LEGO Mindstorms NXT.
+	//
+	// 2010, Institut Laue Langevin.
+
+
+	float seekparam(float a, string tempa, byte handle) // fonction allant automatiquement à la ligne et enregistre les valeurs des parametres ai.
+	{
+		fseek(handle, 2, SEEK_END); // ligne suivante
+		fseek(handle, 3, SEEK_CUR); // avance de 3 bytes
+		fgets(tempa, 5, handle);    // copie les 5 bytes suivants dans tempa
+		a = StrToNum(tempa);        // transforme le string en float
+		return(a);
+	}
+
+	float norm(float a, float b){ // fonction faisant la moyenne entre a et b, avec a pondéré par 2 et retournant cette valeure.
+		a=(2*a+b)/4;
+		return(a);
+	}
+
+	task main()
+	{
+		int i=1;
+		int j=10;
+		int k=0;
+	string tempspeed;
+
+	int new=0; //si nouvelles coordonnées détectés 1, sinon 0
+	int speed = 70;
+	float buteeC;
+	float butee2C;
+
+	float buteeB;
+	float butee2B;
+
+	float buteeA;
+	float butee2A;
+
+	float temp;
+		int x;
+		string test;
+		float a1;
+		string tempa1;
+		float a2;
+		string tempa2;
+		float a3;
+		string tempa3;
+		float a4;
+		string tempa4;
+
+		float a2_corrected;
+		float a4_corrected;
+  
+		float fspeed;
+
+
+	int flag_nothing=0;
+	int flag_mAmoved=0;
+	int flag_mBmoved=0;
+	int flag_mCmoved=0;
+
+	float a2_before=0;
+	float a3_before=0;
+	float fspeed_before=0;
+
+
+	while(true){
+					TextOut(0, LCD_LINE1, "                                             ");
+					TextOut(0, LCD_LINE2, "                                             ");
+					TextOut(0, LCD_LINE3, "                                             ");
+					TextOut(0, LCD_LINE4, "                                             ");
+					TextOut(0, LCD_LINE5, "                                             ");
+					TextOut(0, LCD_LINE6, "                                             ");
+					TextOut(0, LCD_LINE7, "                                             ");
+					TextOut(0, LCD_LINE8, "                                             ");
+
+					TextOut(20, LCD_LINE1,"nxTOF v1.0");
+					TextOut(17, LCD_LINE2,"config file");
+					TextOut(10, LCD_LINE3,"made by McStas");
+
+					NumOut(22, LCD_LINE5, a1-40);   //affiche a1
+					TextOut(2, LCD_LINE5,"A1=");
+					NumOut(75, LCD_LINE5, a2-80);   //affiche a2
+					TextOut(55, LCD_LINE5,"A2=");
+
+					NumOut(22, LCD_LINE6, a3);      // affiche a3
+					TextOut(2, LCD_LINE6,"A3=");
+
+
+
+					NumOut(75, LCD_LINE8, fspeed);  // affiche la vitesse du fermi en pourcent
+					TextOut(2, LCD_LINE8,"Fermi speed=");
+
+		///////////////////////////////////// Data polling /////////////////////////////////////////////
+		i=i-1;
+		if(i==0){
+		byte handle = fopen("nxtof.txt", "r");
+
+
+					fseek(handle, 10, SEEK_SET);     // début de ligne
+					fgets(test, 30, handle);
+					fseek(handle, 2, SEEK_END);      // ligne suivante
+					fgets(test, 30, handle);
+					fseek(handle, 2, SEEK_END);      // ligne suivante à cause du / de la date
+					fgets(test, 30, handle);
+					fseek(handle, 2, SEEK_END);      // Ligne suivante
+					fgets(test, 30, handle);
+
+
+
+
+
+					a1=seekparam(a1,tempa1,handle);
+					a2=seekparam(a2,tempa2,handle);
+					a3=seekparam(a3,tempa3,handle);
+
+					fseek(handle, 2, SEEK_END);
+					fseek(handle, 12, SEEK_CUR);
+					fgets(tempspeed, 3, handle);
+
+					fspeed = StrToNum(tempspeed);      // fermi speed
+
+					fclose(handle);
+
+					a1=40+a1; //butee
+					a2=80+a2;
+
+
+
+
+						i=3;
+	}
+
+
+		///////////////////////////////////// Data analysis /////////////////////////////////////////////
+
+
+
+
+					if (fspeed<10){    //speed correction
+					fspeed=10;
+					}
+					if (fspeed>100){
+					fspeed=100;
+					}
+
+					if (a1!=(a2/2)){ //parameters correction
+					a1=norm(a1,a2);
+					a2=2*a1;
+					}
+
+
+	/////////////////////////////////////// Moving //////////////////////////////////////////////////////
+
+
+					if (new==1){
+
+						OnFwd(OUT_B, fspeed); //fermi
+                 
+						if((a2)>20){
+						ResetTachoCount(OUT_A);
+						RotateMotor(OUT_A,speed,-a2/4);   // le coefficient multiplicatif appliqué est dû à la configuration du systeme d'engrenage.
+						ResetTachoCount(OUT_A);
+						RotateMotor(OUT_A,speed,-a2/4);
+						ResetTachoCount(OUT_A);
+						RotateMotor(OUT_A,speed,-a2/4);
+						ResetTachoCount(OUT_A);
+						RotateMotor(OUT_A,speed,-a2/4);
+						ResetTachoCount(OUT_A);
+						RotateMotor(OUT_A,speed,-a2/4);
+						ResetTachoCount(OUT_A);
+						RotateMotor(OUT_A,speed,-a2/4);
+						ResetTachoCount(OUT_A);
+						RotateMotor(OUT_A,speed,-a2/4);
+						ResetTachoCount(OUT_A);
+						RotateMotor(OUT_A,speed,-a2/4);
+						ResetTachoCount(OUT_A);
+						}
+						else{
+						RotateMotor(OUT_A,speed,-a2/2);
+						ResetTachoCount(OUT_A);
+						RotateMotor(OUT_A,speed,-a2/2);
+						ResetTachoCount(OUT_A);
+						RotateMotor(OUT_A,speed,-a2/2);
+						ResetTachoCount(OUT_A);
+						RotateMotor(OUT_A,speed,-a2/2);
+						ResetTachoCount(OUT_A);
+						}
+
+
+						ResetTachoCount(OUT_C);
+						RotateMotor(OUT_C,speed,(a3-a3_before)/4);
+						ResetTachoCount(OUT_C);
+						RotateMotor(OUT_C,speed,(a3-a3_before)/4);
+						ResetTachoCount(OUT_C);
+						RotateMotor(OUT_C,speed,(a3-a3_before)/4);
+						ResetTachoCount(OUT_C);
+						RotateMotor(OUT_C,speed,(a3-a3_before)/4);
+						ResetTachoCount(OUT_C);
+
+
+
+
+
+
+						flag_mAmoved=1;
+						flag_mCmoved=1;
+
+
+						a2_before=a2;
+						a3_before=a3;
+						fspeed_before=fspeed;
+
+
+						Wait(SEC_1);
+						ResetTachoCount(OUT_A);
+
+						ResetTachoCount(OUT_C);
+
+						PlayTone(500,500); // Positionnement fini
+						new=0;
+						}
+
+
+			if(a3!=a3_before||a2!=a2_before||fspeed!=fspeed_before){
+			j=10;
+			new=1; //nouveaux parametres détectés
+
+			buteeC=100;
+			buteeB=100;
+			buteeA=100;
+
+			butee2B=200;
+			butee2A=200;
+			butee2C=200;
+
+
+
+
+						for (k=0;k<40;k++){    //retour a la position de base   A2=-50; A4=38; A6=152;
+
+										if((butee2A>5)||(butee2A<-5)){
+
+																				RotateMotor(OUT_A,80, 20);
+
+																				if(k%2==0){//détecte la position du moteur 1 oscillation sur 2.
+																				butee2A=MotorTachoCount(OUT_A);// butee2A=0 ou proche de 0 si le moteur est en bûté.
+																				}
+									}
+
+
+									if((butee2B>20)||(butee2B<-20)){
+																				//RotateMotor(OUT_B,60, -10);
+
+																				if(k%2==0){
+																				butee2B=MotorTachoCount(OUT_B);
+																				}
+									}
+
+
+									if((butee2C>5)||(butee2C<-5)){
+																				//  RotateMotor(OUT_C,70, 10);
+
+																				if(k%2==0){
+																				butee2C=MotorTachoCount(OUT_C);
+																				}
+									}
+
+									ResetTachoCount(OUT_C);
+									ResetTachoCount(OUT_B);
+									ResetTachoCount(OUT_A);
+									}
+                                
+
+			}
+
+
+	Wait(SEC_1);
+	ResetSleepTimer();
+		}
+	}
+
+
+
+
+
+
+
+
+
+
+
+

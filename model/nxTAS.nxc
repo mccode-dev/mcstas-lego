@@ -1,0 +1,250 @@
+//
+// Spectrometer TAS with the LEGO Mindstorms NXT.
+//
+// 2010, Institut Laue Langevin.
+#define VERSION "*  nxTAS v1.1  *"
+
+float angles_readvalue(string buffer, string token) 
+// extract a value from the buffer
+// the token is searched first, then look for the next digit and read next value
+{
+  int pos=Pos(token, buffer);
+  
+  if (pos < 0) return(0);
+  
+  pos += StrLen(token); // we pass the token
+  
+  // pass characters until we find a digit or dot or minus sign
+  while (pos < strlen(buffer)
+      && (StrIndex(buffer,pos) < '0' || StrIndex(buffer,pos) > '9') 
+      && StrIndex(buffer,pos) != '.' && StrIndex(buffer,pos) != '-') {
+    if (StrIndex(buffer,pos) == '#') {
+      // found comment: we switch to next EOL
+      while (pos < strlen(buffer)
+        && StrIndex(buffer,pos) != '\n' 
+        && StrIndex(buffer,pos) != '\r') {
+        pos++;
+      }
+    }
+    pos++;
+  }
+  
+  // and convert to a number the following value
+  return(StrToNum(SubStr(buffer, pos, StrLen(buffer) - pos)));
+}
+
+float norm(float a, float b) 
+// compute the mean value between (2*A1, A2) (2*A3, A4), (2*A5, A6)
+// b is about 2*a. Returns 'a'
+{ 
+  a=(2*a+b)/4;
+  return(a);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void display( float angles[] )
+// display current position, called by angles_read
+{
+  
+  // clean up screen
+  ClearScreen();
+        
+  TextOut(0, LCD_LINE1, VERSION);
+  TextOut(0, LCD_LINE2,"Config  file    ");
+  TextOut(0, LCD_LINE3,"from McStas     ");
+
+  NumOut(22, LCD_LINE5, angles[0]);   //display a1
+  TextOut(2, LCD_LINE5,"A1=");
+  NumOut(75, LCD_LINE5, angles[1]);   //display a2
+  TextOut(55, LCD_LINE5,"A2=");
+
+  NumOut(22, LCD_LINE6, angles[2]);   //display a3
+  TextOut(2, LCD_LINE6,"A3=");
+  NumOut(75, LCD_LINE6, angles[3]);   //display a4
+  TextOut(55, LCD_LINE6,"A4=");
+
+  NumOut(22, LCD_LINE7, angles[4]);   //display a5
+  TextOut(2, LCD_LINE7,"A5=");
+  NumOut(75, LCD_LINE7, angles[5]);   //display a6
+  TextOut(55, LCD_LINE7,"A6=");
+        
+  NumOut(40, LCD_LINE8, angles[6]);   // display speed/power
+  TextOut(2, LCD_LINE8,"speed=");
+} // display
+
+////////////////////////////////////////////////////////////////////////////////
+void angles_check( float &angles[] )
+// check consistency of angles (ratio 2 for angles)
+{
+  int i=0; // angle index
+  int j=0; // pair index
+  
+  if (angles[6]<50){    // speed bounds
+    angles[6]=80;
+  }
+  if (angles[6]>100){
+    angles[6]=100;
+  }
+  
+  for (j=0; j < 3; j++) {
+    if (angles[i]!=(angles[i+1]/2)){ // correct angles from mean values
+      angles[i]  =norm(angles[i],angles[i+1]);
+      angles[i+1]=2*angles[i];
+    }
+    i = i+2; // executes loop for pairs 0,1 2,3 and 4,5, that is a1-6
+  }
+  
+} // angles_check
+
+////////////////////////////////////////////////////////////////////////////////
+bool angles_read(string file, float &angles[])
+// opens 'file' and reads values therein.
+//   display angles after read
+//   check read values 
+//
+// returns a modified array of angles a[1-6]+speed
+{
+  byte         data[];
+  unsigned int fsize =0;
+  byte         handle=0;
+  unsigned int result;
+  string       buffer;
+  
+  // open the configuration file
+  result = OpenFileRead(file, fsize, handle);
+  if (result != LDR_SUCCESS) return (false);
+  ClearScreen();
+  TextOut(0, LCD_LINE1, VERSION);
+  TextOut(0, LCD_LINE2, file); 
+  Wait(MS_100); // wait for file to be flushed after detection
+  
+  // read the whole file content in one go
+  result = ReadBytes(handle, fsize, data);
+  // close file
+  result = CloseFile(handle);
+  // remove the file
+  result = DeleteFile(file); 
+  // search for tokens in the buffer
+  buffer = ByteArrayToStr(data);
+  TextOut(0, LCD_LINE2,buffer); 
+  
+  angles[0] = angles_readvalue(buffer, "A1");
+  angles[1] = angles_readvalue(buffer, "A2");
+  angles[2] = angles_readvalue(buffer, "A3");
+  angles[3] = angles_readvalue(buffer, "A4");
+  angles[4] = angles_readvalue(buffer, "A5");
+  angles[5] = angles_readvalue(buffer, "A6");
+  angles[6] = angles_readvalue(buffer, "SPEED");
+  
+  // post process (check, display)
+  angles_check(angles);
+  
+  return ( true );
+} // angles_read
+
+
+////////////////////////////////////////////////////////////////////////////////
+void angles_position( float angles[] )
+// position the model at angle
+{
+  int accuracy =10; // in [deg]
+  int stabilize=1; // flag that is set to 0 when motors are all set
+  int counter  =0;
+  
+  // it may be that the motors do not reach the request
+  // then, the actual TachoCount is not right
+  // we thus move motors until they reach the target
+  // each motor that has been positioned is then locked (Off). 'Coast' stops motor, but does not lock it.
+
+  while (stabilize && counter < 10) {
+    stabilize=0;
+    byte  ports[]  = {OUT_A, OUT_B, OUT_C};
+    float deltas[] = {0,0,0};
+    int   motor=0;
+    deltas[0] = -2*angles[1]  ;
+    deltas[1] =   -angles[3]/2.0; 
+    deltas[2] =    angles[5]/2.0;
+    
+    for (motor=0; motor<ArrayLen(ports); motor++) {
+      byte  port  = ports[motor];
+      float delta = deltas[motor] - MotorRotationCount(port);
+      if( abs(delta) > accuracy) {
+        TextOut(0, LCD_LINE2,"                "); 
+        NumOut(0,  LCD_LINE2, StrCat("[", NumToStr(motor), "] ", NumToStr(MotorRotationCount(port)), "->", NumToStr(-2*angles[1])) ); 
+        RotateMotor(port, angles[6], delta/2.0);
+        stabilize=1;
+      } else {
+        SetOutput(port, RotationCountField, deltas[motor]); // , TachoCountField, deltas[motor]);
+      }
+    }
+
+    counter++;
+  }
+  // free motors
+  Coast(OUT_ABC);
+  
+} // angles_position
+
+////////////////////////////////////////////////////////////////////////////////
+void angles_reset() 
+// send the model to its reference 'zero' position
+// back to zero/base position:  A2=-50; A4=38; A6=152;
+{
+  float angles[] = {0,0,0,0,0,0, 80};
+  TextOut(0, LCD_LINE3, "Resetting zeros ");
+  angles_position(angles);
+  
+} // angles_reset
+
+////////////////////////////////////////////////////////////////////////////////
+task main()
+{
+
+  // main routine and loop
+
+  float angles[]       ={0,0,0,0,0,0,80}; // starting position
+
+  // first initiate the model (send to zero)
+  ClearScreen();
+        
+  TextOut(0, LCD_LINE1,VERSION);
+  TextOut(0, LCD_LINE2,"Align along ref ");
+  TextOut(0, LCD_LINE3,"and press [OK]  ");
+  
+  SetButtonPressCount(BTNCENTER, 0); while (ButtonPressCount(BTNCENTER) == 0); 
+  SetButtonPressCount(BTNCENTER, 0);
+
+  ClearScreen();
+  TextOut(0, LCD_LINE1,VERSION);
+  TextOut(0, LCD_LINE3,"[OK] to reset   ");
+  
+  ResetAllTachoCounts(OUT_ABC); // set reference position
+  
+  while (true) {
+    // lag to stabilize between commands
+    TextOut(0, LCD_LINE2,"                "); // 16 spaces 
+    NumOut(0,    LCD_LINE2,MotorRotationCount(OUT_A)); // MotorRotationCount or MotorTachoCount ?
+    NumOut(05*6, LCD_LINE2,MotorRotationCount(OUT_B));
+    NumOut(10*6, LCD_LINE2,MotorRotationCount(OUT_C));
+    Wait(MS_500);
+    ResetSleepTimer();
+
+    // angles_read (checks+display)
+    // are these new ?
+    if (angles_read("nxtas.txt", angles)) {
+      PlayTone(880,MS_100); // Positioning starts
+      angles_position( angles );
+      display(angles);
+      PlayTone(440,MS_500); // Positioning done
+    } else {
+      if (ButtonPressCount(BTNCENTER)) {
+        angles_reset();
+        SetButtonPressCount(BTNCENTER, 0);
+      }
+    }
+    TextOut(0, LCD_LINE2, "      IDLE      ");
+    TextOut(0, LCD_LINE4, "[OK] to reset   ");
+    Wait(MS_500);
+  }
+
+} // main
