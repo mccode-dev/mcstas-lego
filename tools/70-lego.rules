@@ -1,0 +1,2 @@
+# Lego NXT
+BUS=="usb", SYSFS{idVendor}=="0694", MODE="0666"
